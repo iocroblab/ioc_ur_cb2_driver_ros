@@ -207,24 +207,16 @@ hardware_interface::CallbackReturn URPositionHardwareInterface::on_activate(cons
 
     RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Initializing driver...");
 
-    // Set the UR type
-    this->SetURType(ur_type);
-
-    // Connect to UR robot server
-    this->ConnectToUR(robot_ip);
-    RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Is connected to UR? = %s", isConnectedToUR ? "Yes" : "No");
-    if (!isConnectedToUR){
-        RCLCPP_ERROR(rclcpp::get_logger("URPositionHardwareInterface"), "Could not connect to Robot!");
-        return CallbackReturn::ERROR;
-    }
-    else{
-        // Send UR script to robot controller
-        RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Sending UR Program...");
-        this->ProgramFromFile(script_filename);
+    std::condition_variable rt_msg_cond_;
+    std::condition_variable msg_cond_;
+    int reverse_port = 50001;
+    UrDriver ur_driver_(rt_msg_cond_, msg_cond_, robot_ip, reverse_port, 0.03, 300);
+    if (!ur_driver_.start()) {
+      RCLCPP_ERROR(rclcpp::get_logger("URPositionHardwareInterface"), "Could not connect to Robot!");
+      return hardware_interface::CallbackReturn::ERROR;
     }
 
     RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "System successfully started!");
-
     return hardware_interface::CallbackReturn::SUCCESS;
 }
 
@@ -242,33 +234,36 @@ hardware_interface::CallbackReturn URPositionHardwareInterface::on_deactivate(co
 
 hardware_interface::return_type URPositionHardwareInterface::read(const rclcpp::Time & time, const rclcpp::Duration & period)
 {
-  // Parse status from the UR
-  // update the state using the default state updates the UR gives over the specified UR socket
-  ur_interface.readFromSocket(urSocket);
+	std::vector<double> pos, vel, current, tcp;
+	pos = robot_->rt_interface_->robot_state_->getQActual();
+	vel = robot_->rt_interface_->robot_state_->getQdActual();
+	current = robot_->rt_interface_->robot_state_->getIActual();
+	tcp = robot_->rt_interface_->robot_state_->getTcpForce();
+
+	for (std::size_t i = 0; i < info_.joints.size(); i++) {
+		ur_joint_positions_[i] = pos[i];
+		ur_joint_velocities_[i] = vel[i];
+		ur_joint_efforts_[i] = current[i];
+	}
+	// for (std::size_t i = 0; i < 3; ++i) {
+	// 	robot_force_[i] = tcp[i];
+	// 	robot_torque_[i] = tcp[i + 3];
+	// }
+
   packet_read_ = true;
   
-  // joint positions, velocities, and jacobians
-  for (uint i = 0; i < info_.joints.size(); i++) {
-    UniversalRobot::SingleJoint cur_joint_ = ur_interface.jointData.jd.joint[i];
-    ur_joint_positions_[i] = ur_interface.unionValue(cur_joint_.q_actual);
-    ur_joint_velocities_[i] = ur_interface.unionValue(cur_joint_.qd_actual);
-    ur_joint_efforts_[i] = ur_interface.unionValue(cur_joint_.I_actual);
-    // UniversalRobot::JointMode joint_mode_[i] = static_cast<UniversalRobot::JointMode>(cur_joint_.jointMode);
-  }
-    ur_jacobians_ = ur_interface.getGeoJacobian();
+  // ur_tcp_pose_[0] = ur_interface.unionValue(ur_interface.cartesianInfo.info.x);
+  // ur_tcp_pose_[1] = ur_interface.unionValue(ur_interface.cartesianInfo.info.y);
+  // ur_tcp_pose_[2] = ur_interface.unionValue(ur_interface.cartesianInfo.info.z);
+  // ur_tcp_pose_[3] = ur_interface.unionValue(ur_interface.cartesianInfo.info.Rx);
+  // ur_tcp_pose_[4] = ur_interface.unionValue(ur_interface.cartesianInfo.info.Ry);
+  // ur_tcp_pose_[5] = ur_interface.unionValue(ur_interface.cartesianInfo.info.Rz);
+  // extractToolPose();
 
-    ur_tcp_pose_[0] = ur_interface.unionValue(ur_interface.cartesianInfo.info.x);
-    ur_tcp_pose_[1] = ur_interface.unionValue(ur_interface.cartesianInfo.info.y);
-    ur_tcp_pose_[2] = ur_interface.unionValue(ur_interface.cartesianInfo.info.z);
-    ur_tcp_pose_[3] = ur_interface.unionValue(ur_interface.cartesianInfo.info.Rx);
-    ur_tcp_pose_[4] = ur_interface.unionValue(ur_interface.cartesianInfo.info.Ry);
-    ur_tcp_pose_[5] = ur_interface.unionValue(ur_interface.cartesianInfo.info.Rz);
-    extractToolPose();
-
-  // other robot states data
-  robot_mode_data_ = ur_interface.robotMode.rmd;
-  robot_mode_ = static_cast<UniversalRobot::RobotMode>(robot_mode_data_.state.robotMode);
-  target_speed_fraction_ = ur_interface.unionValue(robot_mode_data_.targetSpeedFraction);
+  // // other robot states data
+  // robot_mode_data_ = ur_interface.robotMode.rmd;
+  // robot_mode_ = static_cast<UniversalRobot::RobotMode>(robot_mode_data_.state.robotMode);
+  // target_speed_fraction_ = ur_interface.unionValue(robot_mode_data_.targetSpeedFraction);
 
   if (first_pass_ && !initialized_)
   {

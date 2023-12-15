@@ -55,7 +55,7 @@
 // #include "hardware_interface/handle.hpp"
 
 // UR stuff
-// #include "ur_client_library/ur/ur_driver.h"
+#include "ioc_ur_cb2_driver/ur_driver.h"
 
 // ROS
 #include "rclcpp/macros.hpp"
@@ -146,7 +146,7 @@ protected:
   bool position_controller_running_;
   bool velocity_controller_running_;
 
-  // std::unique_ptr<urcl::UrDriver> ur_driver_;
+  std::unique_ptr<ioc_ur_cb2_driver::ur_driver> ur_driver_;
 
   // timer to limit sending cmd frequency should be <= 125 Hz
   rclcpp::Time time_last_cmd_send_;
