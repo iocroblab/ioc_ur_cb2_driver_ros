@@ -18,13 +18,13 @@ private:
   // rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr pub_joint_state_;
 };
 
-
 int main(int argc, char * argv[]) {
   rclcpp::init(argc, argv);
   // Creates a shared pointer to an instance of the TestNode class:
   auto my_TestNode = std::make_shared<TestNode>();
 
   // Main variables:
+  std::unique_ptr<UrDriver> ur_driver_;
   unsigned int menu_selection = 0;
   bool stop = false;
   std::vector<double> q;
@@ -38,21 +38,22 @@ int main(int argc, char * argv[]) {
   // Initialize the driver:
   std::condition_variable rt_msg_cond_;
   std::condition_variable msg_cond_;
-  std::string host_default = "192.168.11.2";
-  std::string host;
+  std::string robot_ip_default = "192.168.11.2";
+  std::string robot_ip;
   int reverse_port = 50001;
   std::cout << "Follow the steps to initialize the ioc_ur_cb2_driver:" << std::endl;
-  std::cout << "Enter the robot IP (default=" << host_default << "): ";
-  std::getline(std::cin, host);
-  if (host.empty()) {
-      host = host_default;
+  std::cout << "Enter the robot IP (default=" << robot_ip_default << "): ";
+  std::getline(std::cin, robot_ip);
+  if (robot_ip.empty()) {
+      robot_ip = robot_ip_default;
   }	
 
-  UrDriver robot_(rt_msg_cond_, msg_cond_, host, reverse_port, 0.03, 300);
+  ur_driver_ = std::make_unique<UrDriver>(rt_msg_cond_, msg_cond_, robot_ip, reverse_port, 0.03, 300);
+
   std::mutex msg_lock;
   std::unique_lock<std::mutex> locker(msg_lock);
 
-  if (robot_.start()) {
+  if (ur_driver_->start()) {
     std::cout << "INFO: ioc_ur_cb2_driver initialized successfully" << std::endl;
     // BEGIN LOOP
     while(!stop){
@@ -71,33 +72,34 @@ int main(int argc, char * argv[]) {
       // Execute selection:
       switch(menu_selection){
         case 0: // Stop:
+          ur_driver_->halt();
           std::cout << "Exiting the driver test" << std::endl;
           stop = true;
           break;
 
         case 1: // Read joints:
-          while (!robot_.rt_interface_->robot_state_->getDataPublished()) {
+          while (!ur_driver_->rt_interface_->robot_state_->getDataPublished()) {
               rt_msg_cond_.wait(locker);
           }
-          q = robot_.rt_interface_->robot_state_->getQActual();
+          q = ur_driver_->rt_interface_->robot_state_->getQActual();
           for(unsigned int i=0;i < q.size();i++){
               std::cout << "q[" << i << "]= " << q[i] << std::endl;;
           }   
-          robot_.rt_interface_->robot_state_->setDataPublished();
+          ur_driver_->rt_interface_->robot_state_->setDataPublished();
           break;
 
         case 2: // Set positions:
           cmd = "servoj([1.0,-0.7,2.0,-2.0,-0.8,3.0],0,0,0.02)";   //(q[],X,X,t)
           std::cout << "Moving to the hardcoded joints positions..." << std::endl;
           for(unsigned int k=0; k < 1000; k++){
-              robot_.rt_interface_->addCommandToQueue(cmd);
+              ur_driver_->rt_interface_->addCommandToQueue(cmd);
           }
           break;
 
         case 3: // Set velocities:
           std::cout << "Moving by velocity the hardcoded joints..." << std::endl;
           for(unsigned int k=0; k < 1000; k++){
-              robot_.setSpeed(0.0,0.0,0.0,0.0,0.0,-0.1,100.0);
+              ur_driver_->setSpeed(0.0,0.0,0.0,0.0,0.0,-0.1,100.0);
           }
           break;
 
@@ -110,7 +112,7 @@ int main(int argc, char * argv[]) {
       std::cout << "ERROR: ioc_ur_cb2_driver NOT initialized successfully" << std::endl;
   }
 
-  rclcpp::spin(my_TestNode);
+  // rclcpp::spin(my_TestNode);
   rclcpp::shutdown();
   return 0;
 }
