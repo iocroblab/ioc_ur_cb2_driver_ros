@@ -237,8 +237,7 @@ def launch_setup(context, *args, **kwargs):
         parameters=[
             robot_description,
             update_rate_config_file,
-            initial_joint_controllers,
-            # ParameterFile(initial_joint_controllers, allow_substs=True),
+            ParameterFile(initial_joint_controllers, allow_substs=True),
         ],
         output="screen",
         condition=UnlessCondition(use_mock_hardware),
