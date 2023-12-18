@@ -1,0 +1,9 @@
+<library path="ioc_ur_cb2_driver_ros_plugin">
+    <class name="ioc_ur_cb2_driver_ros/URPositionHardwareInterface"
+            type="ioc_ur_cb2_driver_ros::URPositionHardwareInterface"
+            base_class_type="hardware_interface::SystemInterface">
+        <description>
+            ROS2 Control System Driver for the Universal Robots CB2 series.
+        </description>
+    </class>
+</library>

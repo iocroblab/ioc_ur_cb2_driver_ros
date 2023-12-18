@@ -56,6 +56,8 @@ int main(int argc, char** argv)
   std::string manager_node_name = "controller_manager";
   auto controller_manager = std::make_shared<controller_manager::ControllerManager>(executor, manager_node_name);
 
+  RCLCPP_INFO(controller_manager->get_logger(), "update rate is %d Hz", controller_manager->get_update_rate());
+
   // control loop thread
   std::thread control_loop([controller_manager]() {
     // if (!realtime_tools::configure_sched_fifo(50)) {

@@ -3,7 +3,7 @@
 <package format="3">
   <name>ioc_ur_cb2_driver_ros</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>IOC driver for Universal Robots UR5 robot with CB2 controllers.</description>
   <maintainer email="pol.ramon@upc.edu">pol.ramon</maintainer>
   <license>TODO: License declaration</license>
 

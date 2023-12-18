@@ -61,10 +61,10 @@
 #include "rclcpp/macros.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
 #include "rclcpp_lifecycle/state.hpp"
-#include "geometry_msgs/msg/transform_stamped.hpp"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
+// #include "geometry_msgs/msg/transform_stamped.hpp"
+// #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
-namespace ur_cb2_robot_driver
+namespace ioc_ur_cb2_driver_ros
 {
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
@@ -84,7 +84,7 @@ class URPositionHardwareInterface : public hardware_interface::SystemInterface
 {
 public:
   RCLCPP_SHARED_PTR_DEFINITIONS(URPositionHardwareInterface);
-  virtual ~URPositionHardwareInterface();
+  // virtual ~URPositionHardwareInterface();
 
   hardware_interface::CallbackReturn on_init(const hardware_interface::HardwareInfo& system_info) final;
 
@@ -108,7 +108,7 @@ public:
 
 protected:
 
-  void extractToolPose();
+  // void extractToolPose();
 
   std::array<double, 6> ur_position_commands_;
   std::array<double, 6> ur_position_commands_old_;
@@ -120,15 +120,16 @@ protected:
   std::array<double, 6> ur_tcp_pose_;
   
   // transform stuff
-  tf2::Vector3 tcp_force_;
-  tf2::Vector3 tcp_torque_;
-  geometry_msgs::msg::TransformStamped tcp_transform_;
+  // tf2::Vector3 tcp_force_;
+  // tf2::Vector3 tcp_torque_;
+  // geometry_msgs::msg::TransformStamped tcp_transform_;
 
   bool packet_read_;
 
   // robot states
-  UniversalRobot::RobotModeData robot_mode_data_;
-  UniversalRobot::RobotMode robot_mode_;
+  double robot_mode_;
+  // UniversalRobot::RobotModeData robot_mode_data_;
+  // UniversalRobot::RobotMode robot_mode_;
   bool controllers_initialized_;
 
   // asynchronous commands
@@ -146,14 +147,14 @@ protected:
   bool position_controller_running_;
   bool velocity_controller_running_;
 
-  std::unique_ptr<ioc_ur_cb2_driver::ur_driver> ur_driver_;
+  std::unique_ptr<UrDriver> ur_driver_;
 
   // timer to limit sending cmd frequency should be <= 125 Hz
   rclcpp::Time time_last_cmd_send_;
   rclcpp::Time time_now_;
 };
 
-}  // namespace ur_cb2_robot_driver
+}  // namespace ioc_ur_cb2_driver_ros
 
 #endif  // UR_ROBOT_DRIVER__HARDWARE_INTERFACE_HPP_
 

@@ -48,15 +48,14 @@
 #include "ioc_ur_cb2_driver_ros/hardware_interface.hpp"
 
 
-namespace ur_cb2_robot_driver
-{
+namespace ioc_ur_cb2_driver_ros {
 
-URPositionHardwareInterface::~URPositionHardwareInterface()
-{
-  // If the controller manager is shutdown via Ctrl + C the on_deactivate methods won't be called.
-  // We therefore need to make sure to actually deactivate the communication
-  on_deactivate(rclcpp_lifecycle::State());
-}
+// URPositionHardwareInterface::~URPositionHardwareInterface()
+// {
+//   // If the controller manager is shutdown via Ctrl + C the on_deactivate methods won't be called.
+//   // We therefore need to make sure to actually deactivate the communication
+//   on_deactivate(rclcpp_lifecycle::State());
+// }
 
 hardware_interface::CallbackReturn URPositionHardwareInterface::on_init(const hardware_interface::HardwareInfo & system_info)
 {
@@ -194,37 +193,40 @@ std::vector<hardware_interface::CommandInterface> URPositionHardwareInterface::e
 
 hardware_interface::CallbackReturn URPositionHardwareInterface::on_activate(const rclcpp_lifecycle::State & previous_state)
 {
-    RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Starting ...please wait...");
+  (void) (previous_state);
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Starting ...please wait...");
 
-    // The robot's name.
-    std::string robot_name = info_.hardware_parameters["name"];
-    // The robot's type.
-    std::string ur_type = info_.hardware_parameters["ur_type"];
-    // The robot's IP address.
-    std::string robot_ip = info_.hardware_parameters["robot_ip"];
-    // Path to the urscript code that will be sent to the robot.
-    std::string script_filename = info_.hardware_parameters["script_filename"];
+  // The robot's name.
+  std::string robot_name = info_.hardware_parameters["name"];
+  // The robot's type.
+  std::string ur_type = info_.hardware_parameters["ur_type"];
+  // The robot's IP address.
+  std::string robot_ip = info_.hardware_parameters["robot_ip"];
+  // Path to the urscript code that will be sent to the robot.
+  std::string script_filename = info_.hardware_parameters["script_filename"];
 
-    RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Initializing driver...");
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Initializing driver...");
 
-    std::condition_variable rt_msg_cond_;
-    std::condition_variable msg_cond_;
-    int reverse_port = 50001;
-    UrDriver ur_driver_(rt_msg_cond_, msg_cond_, robot_ip, reverse_port, 0.03, 300);
-    if (!ur_driver_.start()) {
-      RCLCPP_ERROR(rclcpp::get_logger("URPositionHardwareInterface"), "Could not connect to Robot!");
-      return hardware_interface::CallbackReturn::ERROR;
-    }
+  std::condition_variable rt_msg_cond_;
+  std::condition_variable msg_cond_;
+  int reverse_port = 50001;
+  ur_driver_ = std::make_unique<UrDriver>(rt_msg_cond_, msg_cond_, robot_ip, reverse_port, 0.03, 300);
+  if (!ur_driver_->start()) {
+    RCLCPP_ERROR(rclcpp::get_logger("URPositionHardwareInterface"), "Could not connect to Robot!");
+    return hardware_interface::CallbackReturn::ERROR;
+  }
 
-    RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "System successfully started!");
-    return hardware_interface::CallbackReturn::SUCCESS;
+  RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "System successfully started!");
+  return hardware_interface::CallbackReturn::SUCCESS;
 }
 
 hardware_interface::CallbackReturn URPositionHardwareInterface::on_deactivate(const rclcpp_lifecycle::State & previous_state)
 {
+  (void) (previous_state);
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Stopping ...please wait...");
 
   // Anything to clean up?
+  ur_driver_->halt();
 
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "System successfully stopped!");
 
@@ -234,11 +236,13 @@ hardware_interface::CallbackReturn URPositionHardwareInterface::on_deactivate(co
 
 hardware_interface::return_type URPositionHardwareInterface::read(const rclcpp::Time & time, const rclcpp::Duration & period)
 {
+  (void) (time);
+  (void) (period);
 	std::vector<double> pos, vel, current, tcp;
-	pos = robot_->rt_interface_->robot_state_->getQActual();
-	vel = robot_->rt_interface_->robot_state_->getQdActual();
-	current = robot_->rt_interface_->robot_state_->getIActual();
-	tcp = robot_->rt_interface_->robot_state_->getTcpForce();
+	pos = ur_driver_->rt_interface_->robot_state_->getQActual();
+	vel = ur_driver_->rt_interface_->robot_state_->getQdActual();
+	current = ur_driver_->rt_interface_->robot_state_->getIActual();
+	tcp = ur_driver_->rt_interface_->robot_state_->getTcpForce();
 
 	for (std::size_t i = 0; i < info_.joints.size(); i++) {
 		ur_joint_positions_[i] = pos[i];
@@ -251,7 +255,7 @@ hardware_interface::return_type URPositionHardwareInterface::read(const rclcpp::
 	// }
 
   packet_read_ = true;
-  
+  robot_mode_ = ur_driver_->rt_interface_->robot_state_->getRobotMode();
   // ur_tcp_pose_[0] = ur_interface.unionValue(ur_interface.cartesianInfo.info.x);
   // ur_tcp_pose_[1] = ur_interface.unionValue(ur_interface.cartesianInfo.info.y);
   // ur_tcp_pose_[2] = ur_interface.unionValue(ur_interface.cartesianInfo.info.z);
@@ -281,51 +285,52 @@ hardware_interface::return_type URPositionHardwareInterface::read(const rclcpp::
 
 hardware_interface::return_type URPositionHardwareInterface::write(const rclcpp::Time & time, const rclcpp::Duration & period)
 {
+  (void) (time);
+  (void) (period);
   // If there is no interpreting program running on the robot, we do not want to send anything.
   time_now_ = rclcpp::Clock().now();
   rclcpp::Duration time_since_last_send_ = time_now_ - time_last_cmd_send_;
-
-  if (isConnectedToProg && robot_mode_data_.state.isProgramRunning && packet_read_ && time_since_last_send_ >= rclcpp::Duration(0, 8000000))
-  {
-    if (position_controller_running_ && (ur_position_commands_ != ur_position_commands_old_))
-    {
-      this->SetPositionJoint(ur_position_commands_);
-      ur_position_commands_old_ = ur_position_commands_;
-    }
-    else if (velocity_controller_running_)
-    {
-      this->SetVelocityJoint(ur_velocity_commands_);
-    }
-    else
-    {
-      // Do something to keep it alive
-    }
-    time_last_cmd_send_ = time_now_;
-    packet_read_ = false;
+  
+  if(packet_read_ && time_since_last_send_ >= rclcpp::Duration(0, 8000000)) {
+    if (position_controller_running_ && (ur_position_commands_ != ur_position_commands_old_)) {
+        // this->SetPositionJoint(ur_position_commands_);
+        ur_position_commands_old_ = ur_position_commands_;
+      } else if (velocity_controller_running_) {
+        // ur_driver_->setSpeed(ur_velocity_commands_, 100.);
+        ur_driver_->setSpeed(ur_velocity_commands_[0],
+                             ur_velocity_commands_[1],
+                             ur_velocity_commands_[2],
+                             ur_velocity_commands_[3],
+                             ur_velocity_commands_[4],
+                             ur_velocity_commands_[5], 100.);
+      } else {
+        // Do something to keep it alive
+      }
+      time_last_cmd_send_ = time_now_;
+      packet_read_ = false;
   }
-
   return hardware_interface::return_type::OK;
 }
 
-void URPositionHardwareInterface::extractToolPose()
-{
-  // imported from ROS1 driver hardware_interface.cpp#L911-L928
-  double tcp_angle =
-      std::sqrt(std::pow(ur_tcp_pose_[3], 2) + std::pow(ur_tcp_pose_[4], 2) + std::pow(ur_tcp_pose_[5], 2));
+// void URPositionHardwareInterface::extractToolPose()
+// {
+//   // imported from ROS1 driver hardware_interface.cpp#L911-L928
+//   double tcp_angle =
+//       std::sqrt(std::pow(ur_tcp_pose_[3], 2) + std::pow(ur_tcp_pose_[4], 2) + std::pow(ur_tcp_pose_[5], 2));
 
-  tf2::Vector3 rotation_vec(ur_tcp_pose_[3], ur_tcp_pose_[4], ur_tcp_pose_[5]);
-  tf2::Quaternion rotation;
-  if (tcp_angle > 1e-16) {
-    rotation.setRotation(rotation_vec.normalized(), tcp_angle);
-  } else {
-    rotation.setValue(0.0, 0.0, 0.0, 1.0);  // default Quaternion is 0,0,0,0 which is invalid
-  }
-  tcp_transform_.transform.translation.x = ur_tcp_pose_[0];
-  tcp_transform_.transform.translation.y = ur_tcp_pose_[1];
-  tcp_transform_.transform.translation.z = ur_tcp_pose_[2];
+//   tf2::Vector3 rotation_vec(ur_tcp_pose_[3], ur_tcp_pose_[4], ur_tcp_pose_[5]);
+//   tf2::Quaternion rotation;
+//   if (tcp_angle > 1e-16) {
+//     rotation.setRotation(rotation_vec.normalized(), tcp_angle);
+//   } else {
+//     rotation.setValue(0.0, 0.0, 0.0, 1.0);  // default Quaternion is 0,0,0,0 which is invalid
+//   }
+//   tcp_transform_.transform.translation.x = ur_tcp_pose_[0];
+//   tcp_transform_.transform.translation.y = ur_tcp_pose_[1];
+//   tcp_transform_.transform.translation.z = ur_tcp_pose_[2];
 
-  tcp_transform_.transform.rotation = tf2::toMsg(rotation);
-}
+//   tcp_transform_.transform.rotation = tf2::toMsg(rotation);
+// }
 
 hardware_interface::return_type URPositionHardwareInterface::prepare_command_mode_switch(
     const std::vector<std::string>& start_interfaces, const std::vector<std::string>& stop_interfaces)
@@ -382,6 +387,8 @@ hardware_interface::return_type URPositionHardwareInterface::prepare_command_mod
 hardware_interface::return_type URPositionHardwareInterface::perform_command_mode_switch(
     const std::vector<std::string>& start_interfaces, const std::vector<std::string>& stop_interfaces)
 {
+  (void) (start_interfaces);
+  (void) (stop_interfaces);
   hardware_interface::return_type ret_val = hardware_interface::return_type::OK;
 
   if (stop_modes_.size() != 0 &&
@@ -412,9 +419,9 @@ hardware_interface::return_type URPositionHardwareInterface::perform_command_mod
 
   return ret_val;
 }
-}  // namespace ur_cb2_robot_driver
+}  // namespace ioc_ur_cb2_driver_ros
 
 #include "pluginlib/class_list_macros.hpp"
 
 PLUGINLIB_EXPORT_CLASS(
-  ur_cb2_robot_driver::URPositionHardwareInterface, hardware_interface::SystemInterface)
+  ioc_ur_cb2_driver_ros::URPositionHardwareInterface, hardware_interface::SystemInterface)
