@@ -103,7 +103,7 @@ def launch_setup(context, *args, **kwargs):
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
-            PathJoinSubstitution([FindPackageShare("ur_cb2_description"), "urdf", description_file]),
+            PathJoinSubstitution([FindPackageShare("ioc_ur_cb2_driver_ros"), "urdf", description_file]),
             " ",
             "robot_ip:=",
             robot_ip,

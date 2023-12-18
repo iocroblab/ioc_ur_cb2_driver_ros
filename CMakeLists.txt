@@ -18,6 +18,8 @@ find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(controller_manager REQUIRED)
 find_package(ioc_ur_cb2_driver REQUIRED)
+find_package(urdf REQUIRED)
+find_package(xacro REQUIRED)
 
 include_directories(include)
 
@@ -90,7 +92,7 @@ install(
   DIRECTORY include/
   DESTINATION include
 )
-install(DIRECTORY config launch
+install(DIRECTORY config launch urdf
   DESTINATION share/${PROJECT_NAME}
 )
 
