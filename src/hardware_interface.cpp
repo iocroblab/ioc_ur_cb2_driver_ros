@@ -293,21 +293,25 @@ hardware_interface::return_type URPositionHardwareInterface::write(const rclcpp:
   
   if(packet_read_ && time_since_last_send_ >= rclcpp::Duration(0, 8000000)) {
     if (position_controller_running_ && (ur_position_commands_ != ur_position_commands_old_)) {
-        // this->SetPositionJoint(ur_position_commands_);
-        ur_position_commands_old_ = ur_position_commands_;
-      } else if (velocity_controller_running_) {
-        // ur_driver_->setSpeed(ur_velocity_commands_, 100.);
-        ur_driver_->setSpeed(ur_velocity_commands_[0],
-                             ur_velocity_commands_[1],
-                             ur_velocity_commands_[2],
-                             ur_velocity_commands_[3],
-                             ur_velocity_commands_[4],
-                             ur_velocity_commands_[5], 100.);
-      } else {
-        // Do something to keep it alive
-      }
-      time_last_cmd_send_ = time_now_;
-      packet_read_ = false;
+      ur_position_commands_old_ = ur_position_commands_;
+      ur_driver_->setServo(ur_position_commands_[0], 
+                            ur_position_commands_[1], 
+                            ur_position_commands_[2], 
+                            ur_position_commands_[3], 
+                            ur_position_commands_[4], 
+                            ur_position_commands_[5], 5.); // Time [seconds]
+    } else if (velocity_controller_running_) {
+      ur_driver_->setSpeed(ur_velocity_commands_[0],
+                            ur_velocity_commands_[1],
+                            ur_velocity_commands_[2],
+                            ur_velocity_commands_[3],
+                            ur_velocity_commands_[4],
+                            ur_velocity_commands_[5], 100.);  // Joint acceleration [rad/s²]
+    } else {
+      // Do something to keep it alive
+    }
+    time_last_cmd_send_ = time_now_;
+    packet_read_ = false;
   }
   return hardware_interface::return_type::OK;
 }
@@ -395,6 +399,7 @@ hardware_interface::return_type URPositionHardwareInterface::perform_command_mod
       std::find(stop_modes_.begin(), stop_modes_.end(), StoppingInterface::STOP_POSITION) != stop_modes_.end()) {
     position_controller_running_ = false;
     ur_position_commands_ = ur_position_commands_old_ = ur_joint_positions_;
+
   } else if (stop_modes_.size() != 0 &&
              std::find(stop_modes_.begin(), stop_modes_.end(), StoppingInterface::STOP_VELOCITY) != stop_modes_.end()) {
     velocity_controller_running_ = false;
