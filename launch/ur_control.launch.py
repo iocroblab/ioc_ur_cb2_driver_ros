@@ -47,7 +47,8 @@ def launch_setup(context, *args, **kwargs):
     safety_limits = LaunchConfiguration("safety_limits")
     safety_pos_margin = LaunchConfiguration("safety_pos_margin")
     safety_k_position = LaunchConfiguration("safety_k_position")
-    # cm_node_name = LaunchConfiguration("cm_node_name")
+    cm_node_name = LaunchConfiguration("cm_node_name")
+    namespace = LaunchConfiguration("namespace")
     # General arguments
     runtime_config_package = LaunchConfiguration("runtime_config_package")
     controllers_file = LaunchConfiguration("controllers_file")
@@ -317,7 +318,7 @@ def launch_setup(context, *args, **kwargs):
         package = "controller_manager",
         executable = "spawner",
         arguments = ["joint_state_broadcaster",
-                    "--controller-manager", "/controller_manager"],
+                    "--controller-manager", cm_node_name],
     )
 
 
@@ -355,10 +356,8 @@ def launch_setup(context, *args, **kwargs):
         executable="spawner",
         arguments=[
             initial_joint_controller,
-            "-c",
-            "/controller_manager",
-            "--controller-manager-timeout",
-            controller_spawner_timeout,
+            "--controller-manager", cm_node_name,
+            "--controller-manager-timeout", controller_spawner_timeout,
         ],
         condition=IfCondition(activate_joint_controller),
     )
@@ -367,10 +366,8 @@ def launch_setup(context, *args, **kwargs):
         executable="spawner",
         arguments=[
             initial_joint_controller,
-            "-c",
-            "/controller_manager",
-            "--controller-manager-timeout",
-            controller_spawner_timeout,
+            "--controller-manager", cm_node_name,
+            "--controller-manager-timeout", controller_spawner_timeout,
             "--inactive",
         ],
         condition=UnlessCondition(activate_joint_controller),
@@ -430,6 +427,20 @@ def generate_launch_description():
         )
     )
     # General arguments
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "namespace",
+            default_value="**",
+            description="Namespace of the launch nodes",
+        )
+    )
+    declared_arguments.append(
+        DeclareLaunchArgument(
+            "cm_node_name",
+            default_value="/controller_manager",
+            description="Controller manager node name without namespace. Pass it if a namespace is used.",
+        )
+    )
     declared_arguments.append(
         DeclareLaunchArgument(
             "runtime_config_package",
