@@ -118,6 +118,9 @@ protected:
   std::array<double, 6> ur_joint_efforts_;
   std::array<double, 6> ur_ft_sensor_measurements_;
   std::array<double, 6> ur_tcp_pose_;
+
+  std::condition_variable rt_msg_cond_;
+  std::condition_variable msg_cond_;
   
   // transform stuff
   // tf2::Vector3 tcp_force_;

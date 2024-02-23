@@ -207,8 +207,6 @@ hardware_interface::CallbackReturn URPositionHardwareInterface::on_activate(cons
 
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Initializing driver...");
 
-  std::condition_variable rt_msg_cond_;
-  std::condition_variable msg_cond_;
   int reverse_port = 50001;
   ur_driver_ = std::make_unique<UrDriver>(rt_msg_cond_, msg_cond_, robot_ip, reverse_port, 0.03, 300);
   if (!ur_driver_->start()) {
