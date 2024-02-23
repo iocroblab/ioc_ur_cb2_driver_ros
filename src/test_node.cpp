@@ -99,7 +99,7 @@ int main(int argc, char * argv[]) {
         case 3: // Set velocities:
           std::cout << "Moving by velocity the hardcoded joints..." << std::endl;
           for(unsigned int k=0; k < 1000; k++){
-              ur_driver_->setSpeed(0.0,0.0,0.0,0.0,0.0,-0.1,100.0);
+              ur_driver_->setSpeed(0.0,0.0,0.0,0.0,0.0,-0.1,5.0);
           }
           break;
 

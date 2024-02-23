@@ -306,7 +306,7 @@ hardware_interface::return_type URPositionHardwareInterface::write(const rclcpp:
                             ur_velocity_commands_[2],
                             ur_velocity_commands_[3],
                             ur_velocity_commands_[4],
-                            ur_velocity_commands_[5], 100.);  // Joint acceleration [rad/s²]
+                            ur_velocity_commands_[5], 5.);  // Joint acceleration [rad/s²]
     } else {
       // Do something to keep it alive
     }
