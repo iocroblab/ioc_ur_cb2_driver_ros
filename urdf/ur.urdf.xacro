@@ -26,6 +26,7 @@
    <xacro:arg name="output_recipe_filename" default=""/>
    <xacro:arg name="input_recipe_filename" default=""/>
    <xacro:arg name="reverse_ip" default="0.0.0.0"/>
+   <xacro:arg name="reverse_port" default="50001"/>
    <xacro:arg name="script_command_port" default="50004"/>
    <!--   tool communication related parameters-->
    <xacro:arg name="use_tool_communication" default="false" />
@@ -87,6 +88,7 @@
      output_recipe_filename="$(arg output_recipe_filename)"
      input_recipe_filename="$(arg input_recipe_filename)"
      reverse_ip="$(arg reverse_ip)"
+     reverse_port="$(arg reverse_port)"
      script_command_port="$(arg script_command_port)"
      >
      <origin xyz="0 0 0" rpy="0 0 0" />          <!-- position robot in the world -->

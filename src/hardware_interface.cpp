@@ -202,12 +202,14 @@ hardware_interface::CallbackReturn URPositionHardwareInterface::on_activate(cons
   std::string ur_type = info_.hardware_parameters["ur_type"];
   // The robot's IP address.
   std::string robot_ip = info_.hardware_parameters["robot_ip"];
+  // Port that will be opened to communicate between the driver and the robot controller.
+  // Note: Must be different if multiples ur_drivers are launched from the same machine!
+  int reverse_port = stoi(info_.hardware_parameters["reverse_port"]);
   // Path to the urscript code that will be sent to the robot.
   std::string script_filename = info_.hardware_parameters["script_filename"];
 
   RCLCPP_INFO(rclcpp::get_logger("URPositionHardwareInterface"), "Initializing driver...");
 
-  int reverse_port = 50001;
   ur_driver_ = std::make_unique<UrDriver>(rt_msg_cond_, msg_cond_, robot_ip, reverse_port, 0.03, 300);
   if (!ur_driver_->start()) {
     RCLCPP_ERROR(rclcpp::get_logger("URPositionHardwareInterface"), "Could not connect to Robot!");

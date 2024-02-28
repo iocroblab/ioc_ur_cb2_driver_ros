@@ -74,7 +74,7 @@ def launch_setup(context, *args, **kwargs):
     # tool_voltage = LaunchConfiguration("tool_voltage")
     # reverse_ip = LaunchConfiguration("reverse_ip")
     # script_command_port = LaunchConfiguration("script_command_port")
-    # reverse_port = LaunchConfiguration("reverse_port")
+    reverse_port = LaunchConfiguration("reverse_port")
     # script_sender_port = LaunchConfiguration("script_sender_port")
     # trajectory_port = LaunchConfiguration("trajectory_port")
 
@@ -190,9 +190,9 @@ def launch_setup(context, *args, **kwargs):
             # "script_command_port:=",
             # script_command_port,
             # " ",
-            # "reverse_port:=",
-            # reverse_port,
-            # " ",
+            "reverse_port:=",
+            reverse_port,
+            " ",
             # "script_sender_port:=",
             # script_sender_port,
             # " ",

@@ -83,7 +83,7 @@ enum StoppingInterface
 class URPositionHardwareInterface : public hardware_interface::SystemInterface
 {
 public:
-  RCLCPP_SHARED_PTR_DEFINITIONS(URPositionHardwareInterface);
+  RCLCPP_SHARED_PTR_DEFINITIONS(URPositionHardwareInterface)
   // virtual ~URPositionHardwareInterface();
 
   hardware_interface::CallbackReturn on_init(const hardware_interface::HardwareInfo& system_info) final;
