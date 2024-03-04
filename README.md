@@ -5,8 +5,8 @@ Repository for the UR CB2 Driver ROS layer. The communication with UR CB2 is mai
 ## Install and build the package
 First create a workspace:
 ```
-mkdir -p ws_arm/src
-cd ws_arm/src
+mkdir -p ws_cb2/src
+cd ws_cb2/src
 ``` 
 It is necessary to clone the following repositories:
 ```
@@ -23,7 +23,7 @@ sudo apt install ros-humble-ur-description
 ```
 Finally, at the root of your ROS 2 workspace, build using:
 ```
-colcon build --symlink-install
+colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 ``` 
 ## Usage instruction
 Once the code is compiled, and the workspace is set using:
