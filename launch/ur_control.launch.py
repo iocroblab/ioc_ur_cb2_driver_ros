@@ -321,6 +321,13 @@ def launch_setup(context, *args, **kwargs):
                     "--controller-manager", cm_node_name],
     )
 
+    io_and_status_controller_spawner = Node(
+        package = "controller_manager",
+        executable = "spawner",
+        arguments = ["io_and_status_controller",
+                    "--controller-manager", cm_node_name],
+    )
+
 
     # Spawn controllers
     # def controller_spawner(name, active=True):
@@ -383,6 +390,7 @@ def launch_setup(context, *args, **kwargs):
         robot_state_publisher_node,
         rviz_node,
         joint_state_broadcaster_spawner,
+        # io_and_status_controller_spawner,
         initial_joint_controller_spawner_stopped,
         initial_joint_controller_spawner_started,
     ] #+ controller_spawners

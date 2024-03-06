@@ -160,6 +160,14 @@ std::vector<hardware_interface::StateInterface> URPositionHardwareInterface::exp
 
     state_interfaces.emplace_back(hardware_interface::StateInterface(tf_prefix + "system_interface", "initialized", &system_interface_initialized_));
 
+    for (auto& sensor : info_.sensors) {
+      for (uint j = 0; j < sensor.state_interfaces.size(); ++j) {
+        RCLCPP_WARN(rclcpp::get_logger("UrRobotHW"), "sensor name %s",sensor.name.c_str());
+        state_interfaces.emplace_back(hardware_interface::StateInterface(sensor.name, sensor.state_interfaces[j].name,
+                                                                        &ur_ft_sensor_measurements_[j]));
+      }
+    }
+
     return state_interfaces;
 }
 
@@ -238,24 +246,45 @@ hardware_interface::return_type URPositionHardwareInterface::read(const rclcpp::
 {
   (void) (time);
   (void) (period);
-	std::vector<double> pos, vel, current, tcp;
+	std::vector<double> pos, vel, current, tcp_force, tcp_pose;
 	pos = ur_driver_->rt_interface_->robot_state_->getQActual();
 	vel = ur_driver_->rt_interface_->robot_state_->getQdActual();
 	current = ur_driver_->rt_interface_->robot_state_->getIActual();
-	tcp = ur_driver_->rt_interface_->robot_state_->getTcpForce();
+	tcp_force = ur_driver_->rt_interface_->robot_state_->getTcpForce();
+	tcp_pose = ur_driver_->rt_interface_->robot_state_->getToolVectorActual();
+
+  // printf("getTcpForce: ");
+	// for (size_t i = 0; i < tcp_pose.size(); ++i) {
+  //   printf("%.2f ", tcp_pose[i]);
+  // }
+  // printf("\n");
 
 	for (std::size_t i = 0; i < info_.joints.size(); i++) {
 		ur_joint_positions_[i] = pos[i];
 		ur_joint_velocities_[i] = vel[i];
 		ur_joint_efforts_[i] = current[i];
+    ur_ft_sensor_measurements_[i] = tcp_force[i];
+    ur_tcp_pose_[i] = tcp_pose[i];
 	}
 	// for (std::size_t i = 0; i < 3; ++i) {
 	// 	robot_force_[i] = tcp[i];
 	// 	robot_torque_[i] = tcp[i + 3];
 	// }
 
-  packet_read_ = true;
+  
   robot_mode_ = ur_driver_->rt_interface_->robot_state_->getRobotMode();
+  // printf("%.2f \n", robot_mode_);
+
+  // ROBOT MODE STATES:
+  // 0 : OK (READY TO BE USED)
+  // 1 : TEACH (BREAK REALASE || CONTROLLED FROM TEACH)
+  // 2 :
+  // 3 : INITIALIZING
+  // 4 : SECURITY STOPPED (SAFE STOP DUE COALITION)
+  // 5 : EMERGENCY STOPPED (RED BUTTON PRESSED)
+  // 6 : 
+  // 7 : ROBOT POWER OFF
+
   // ur_tcp_pose_[0] = ur_interface.unionValue(ur_interface.cartesianInfo.info.x);
   // ur_tcp_pose_[1] = ur_interface.unionValue(ur_interface.cartesianInfo.info.y);
   // ur_tcp_pose_[2] = ur_interface.unionValue(ur_interface.cartesianInfo.info.z);
@@ -268,6 +297,8 @@ hardware_interface::return_type URPositionHardwareInterface::read(const rclcpp::
   // robot_mode_data_ = ur_interface.robotMode.rmd;
   // robot_mode_ = static_cast<UniversalRobot::RobotMode>(robot_mode_data_.state.robotMode);
   // target_speed_fraction_ = ur_interface.unionValue(robot_mode_data_.targetSpeedFraction);
+  
+  packet_read_ = true;
 
   if (first_pass_ && !initialized_)
   {
