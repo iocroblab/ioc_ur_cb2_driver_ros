@@ -1,6 +1,8 @@
 # ioc_ur_cb2_driver_ros
 
-Repository for the UR CB2 Driver ROS layer. The communication with UR CB2 is mainly managed by the ur_driver class, which is wrapped by the ioc_ur_cb2_driver_ros that incorporates it to the ROS framework.
+It is inspired and uses the code from https://github.com/UniversalRobots/Universal_Robots_ROS2_Driver.git.
+
+The communication with UR CB2 is mainly managed by the ur_driver class, which is wrapped by the ioc_ur_cb2_driver_ros that incorporates it to the ROS2 framework.
 
 ## Install and build the package
 First create a workspace:
