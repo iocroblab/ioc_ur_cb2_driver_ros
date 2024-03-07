@@ -15,7 +15,7 @@
   <depend>pluginlib</depend>
   <depend>hardware_interface</depend>
   <depend>controller_manager</depend>
-  <depend>ioc_ur_cb2_driver</depend>
+  <depend>ur_cb2_driver</depend>
   <depend>urdf</depend>
   <depend>xacro</depend>
 

@@ -4,7 +4,7 @@
 #include "rclcpp/rclcpp.hpp"
 
 // UR driver:
-#include "ioc_ur_cb2_driver/ur_driver.h"
+#include <ur_cb2_driver/ur_driver.h>
 
 
 class TestNode : public rclcpp::Node {

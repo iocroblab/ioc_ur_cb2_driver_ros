@@ -55,7 +55,7 @@
 // #include "hardware_interface/handle.hpp"
 
 // UR stuff
-#include "ioc_ur_cb2_driver/ur_driver.h"
+#include <ur_cb2_driver/ur_driver.h>
 
 // ROS
 #include "rclcpp/macros.hpp"

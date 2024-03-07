@@ -17,7 +17,7 @@ find_package(rclcpp_lifecycle REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(controller_manager REQUIRED)
-find_package(ioc_ur_cb2_driver REQUIRED)
+find_package(ur_cb2_driver REQUIRED)
 find_package(urdf REQUIRED)
 find_package(xacro REQUIRED)
 
@@ -29,13 +29,13 @@ set(THIS_PACKAGE_INCLUDE_DEPENDS
   hardware_interface
   pluginlib
   controller_manager
-  ioc_ur_cb2_driver
+  ur_cb2_driver
 )
 
-# IOC_UR_CB2_DRIVER:
-get_target_property(ioc_ur_cb2_driver_INCLUDE_DIRS ${ioc_ur_cb2_driver_LIBRARIES} INTERFACE_INCLUDE_DIRECTORIES)
-include_directories(${ioc_ur_cb2_driver_INCLUDE_DIRS})
-set(IOC_UR_CB2_DRIVER_LIBS ${IOC_UR_CB2_DRIVER_LIBS} ${ioc_ur_cb2_driver_LIBRARIES})
+# UR_CB2_DRIVER:
+get_target_property(ur_cb2_driver_shared_INCLUDE_DIRS ${ur_cb2_driver_LIBRARIES} INTERFACE_INCLUDE_DIRECTORIES)
+include_directories(${ur_cb2_driver_INCLUDE_DIRS})
+set(UR_CB2_DRIVER_LIBS ${UR_CB2_DRIVER_LIBS} ${ur_cb2_driver_LIBRARIES})
 
 # Hardware interface things:
 add_library(ioc_ur_cb2_driver_ros_plugin
@@ -76,7 +76,7 @@ add_executable(test_node
 )
 ament_target_dependencies(test_node
   rclcpp
-  ioc_ur_cb2_driver
+  ur_cb2_driver
 )
 
 # INSTALL:
