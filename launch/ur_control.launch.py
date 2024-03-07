@@ -104,7 +104,7 @@ def launch_setup(context, *args, **kwargs):
         [
             PathJoinSubstitution([FindExecutable(name="xacro")]),
             " ",
-            PathJoinSubstitution([FindPackageShare("ioc_ur_cb2_driver_ros"), "urdf", description_file]),
+            PathJoinSubstitution([FindPackageShare("ur_cb2_driver_ros"), "urdf", description_file]),
             " ",
             "robot_ip:=",
             robot_ip,
@@ -233,7 +233,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     ur_control_node = Node(
-        package="ioc_ur_cb2_driver_ros",
+        package="ur_cb2_driver_ros",
         executable="ur_ros2_control_node",
         parameters=[
             robot_description,
@@ -452,7 +452,7 @@ def generate_launch_description():
     declared_arguments.append(
         DeclareLaunchArgument(
             "runtime_config_package",
-            default_value="ioc_ur_cb2_driver_ros",
+            default_value="ur_cb2_driver_ros",
             description='Package with the controller\'s configuration in "config" folder. \
         Usually the argument is not set, it enables use of a custom setup.',
         )

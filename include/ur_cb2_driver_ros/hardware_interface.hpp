@@ -64,7 +64,7 @@
 // #include "geometry_msgs/msg/transform_stamped.hpp"
 // #include "tf2_geometry_msgs/tf2_geometry_msgs.hpp"
 
-namespace ioc_ur_cb2_driver_ros
+namespace ur_cb2_driver_ros
 {
 using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
 
@@ -157,7 +157,7 @@ protected:
   rclcpp::Time time_now_;
 };
 
-}  // namespace ioc_ur_cb2_driver_ros
+}  // namespace ur_cb2_driver_ros
 
 #endif  // UR_ROBOT_DRIVER__HARDWARE_INTERFACE_HPP_
 

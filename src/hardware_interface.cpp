@@ -45,10 +45,10 @@
 
 #include "rclcpp/rclcpp.hpp"
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
-#include "ioc_ur_cb2_driver_ros/hardware_interface.hpp"
+#include "ur_cb2_driver_ros/hardware_interface.hpp"
 
 
-namespace ioc_ur_cb2_driver_ros {
+namespace ur_cb2_driver_ros {
 
 // URPositionHardwareInterface::~URPositionHardwareInterface()
 // {
@@ -455,9 +455,9 @@ hardware_interface::return_type URPositionHardwareInterface::perform_command_mod
 
   return ret_val;
 }
-}  // namespace ioc_ur_cb2_driver_ros
+}  // namespace ur_cb2_driver_ros
 
 #include "pluginlib/class_list_macros.hpp"
 
 PLUGINLIB_EXPORT_CLASS(
-  ioc_ur_cb2_driver_ros::URPositionHardwareInterface, hardware_interface::SystemInterface)
+  ur_cb2_driver_ros::URPositionHardwareInterface, hardware_interface::SystemInterface)

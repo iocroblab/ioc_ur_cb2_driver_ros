@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>ioc_ur_cb2_driver_ros</name>
+  <name>ur_cb2_driver_ros</name>
   <version>0.0.0</version>
-  <description>IOC driver for Universal Robots UR5 robot with CB2 controllers.</description>
+  <description>ROS2 layer for the UR5 Universal Robots with CB2 controllers.</description>
   <maintainer email="pol.ramon@upc.edu">pol.ramon</maintainer>
   <license>TODO: License declaration</license>
 

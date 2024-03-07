@@ -105,7 +105,7 @@
 
 
     <!-- ros2 control include -->
-    <xacro:include filename="$(find ioc_ur_cb2_driver_ros)/urdf/ur.ros2_control.xacro" />
+    <xacro:include filename="$(find ur_cb2_driver_ros)/urdf/ur.ros2_control.xacro" />
     <!-- ros2 control instance -->
     <xacro:ur_ros2_control
       name="${name}"

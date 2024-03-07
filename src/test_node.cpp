@@ -32,7 +32,7 @@ int main(int argc, char * argv[]) {
 
   // Welcome:
   std::cout << std::endl;
-  std::cout << "----- IOC-UR-CB2-DRIVER TEST -----" << std::endl;
+  std::cout << "----- UR-CB2-DRIVER TEST -----" << std::endl;
   std::cout << std::endl;
 
   // Initialize the driver:
@@ -41,7 +41,7 @@ int main(int argc, char * argv[]) {
   std::string robot_ip_default = "192.168.11.2";
   std::string robot_ip;
   int reverse_port = 50001;
-  std::cout << "Follow the steps to initialize the ioc_ur_cb2_driver:" << std::endl;
+  std::cout << "Follow the steps to initialize the ur_cb2_driver:" << std::endl;
   std::cout << "Enter the robot IP (default=" << robot_ip_default << "): ";
   std::getline(std::cin, robot_ip);
   if (robot_ip.empty()) {
@@ -54,7 +54,7 @@ int main(int argc, char * argv[]) {
   std::unique_lock<std::mutex> locker(msg_lock);
 
   if (ur_driver_->start()) {
-    std::cout << "INFO: ioc_ur_cb2_driver initialized successfully" << std::endl;
+    std::cout << "INFO: ur_cb2_driver initialized successfully" << std::endl;
     // BEGIN LOOP
     while(!stop){
       // Print menu:
@@ -109,7 +109,7 @@ int main(int argc, char * argv[]) {
       } // END SWITCH-CASE
     } // END LOOP
   } else {
-      std::cout << "ERROR: ioc_ur_cb2_driver NOT initialized successfully" << std::endl;
+      std::cout << "ERROR: ur_cb2_driver NOT initialized successfully" << std::endl;
   }
 
   // rclcpp::spin(my_TestNode);
