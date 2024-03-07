@@ -2,11 +2,12 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>ur_cb2_driver_ros</name>
-  <version>0.0.0</version>
+  <version>0.0.1</version>
   <description>ROS2 layer for the UR5 Universal Robots with CB2 controllers.</description>
   <maintainer email="pol.ramon@upc.edu">pol.ramon</maintainer>
-  <license>TODO: License declaration</license>
-
+   <maintainer email="leopold.palomo@upc.edu">Leopold Palomo-Avellaneda</maintainer>
+   <license file="LICENSE.txt">Apache License 2.0</license>
+  
   <buildtool_depend>ament_cmake</buildtool_depend>
 
   <depend>rclcpp</depend>
