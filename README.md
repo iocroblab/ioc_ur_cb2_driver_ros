@@ -12,8 +12,8 @@ cd ws_cb2/src
 ``` 
 It is necessary to clone the following repositories:
 ```
-git clone https://gitioc.upc.edu/robots/ioc_ur_cb2_driver_ros.git
-git clone https://gitioc.upc.edu/robots/ioc_ur_cb2_driver.git -b devel
+git clone https://github.com/iocroblab/ioc_ur_cb2_driver.git
+git clone https://github.com/iocroblab/ioc_ur_cb2_driver_ros.git
 ```
 And have installed:
 ```
