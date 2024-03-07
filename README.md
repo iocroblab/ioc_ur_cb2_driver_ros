@@ -7,6 +7,7 @@ The communication with UR CB2 is mainly managed by the ur_driver class, which is
 ## Install and build the package
 
 First create a workspace:
+
 ```
 mkdir -p ws_cb2/src
 cd ws_cb2/src
